@@ -1,2 +1,135 @@
----
-api: "CMC API"
+swagger: "2.0"
+info:
+  description: "CMC API Suite."
+  version: "1.0.0"
+  title: "Commercial Metals Company"
+  contact:
+    email: "patrick.walsh@cmc.com"
+host: "apipreprod.cmc.com"
+basePath: "/data"
+tags:
+- name: "inventory"
+  description: "Product availability and pricing"
+- name: "order"
+  description: "Place an order"
+schemes:
+- "https"
+paths:
+  /inventory:
+    post:
+      tags:
+      - "inventory"
+      summary: "View CMC product quantity availabilty along with pricing information"
+      description: ""
+      operationId: "inventory"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "inventory object which contains properties to filter data."
+        required: false
+        schema:
+          $ref: "#/definitions/Inventory"
+      security:
+        - basicAuth: []
+      responses:
+        "405":
+          description: "Invalid input"
+  /order:
+    post:
+      tags:
+      - "order"
+      summary: "Place an order directly to CMC"
+      description: ""
+      operationId: "order"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "order object that for placing an order"
+        required: true
+        schema:
+          $ref: "#/definitions/Order"
+      security:
+        - basicAuth: []
+      responses:
+        "405":
+          description: "Invalid input"
+securityDefinitions:
+  basicAuth:
+     type: "basic"
+definitions:
+  FilterProperties:
+    type: "object"
+    properties:
+      operator:
+        type: "string"
+        description: "operator to be used to filter the data"
+        enum:
+        - "= - Equals to the value"
+        - "> - Grater than the value"
+        - "< - Less than the value"
+        - ">= - Grather than equal to the value"
+        - "<= - Less than equal to the value"
+        - "<> - Not equal to the value"
+        - "*LIKE - Ending characters of the result are Like the value"
+        - "LIKE* - Begining characters of the results are Like the value"
+        - "*LIKE* - Where the characters of the result are Like the value anywhere"
+        - "BETWEEN - Where the result falls between 2 values. (Value field must have 2 values seperated by a | symbol ex. 50|100)"
+      value:
+        type: "string"
+        description: "value to be used to filter the data results"
+    xml:
+      name: "FilterProperties"
+  ShipToProperties:
+      type: "object"
+      properties:
+        LocationCode:
+           type: "string"
+        Name:
+           type: "string"
+  Inventory:
+    type: "object"
+    required:
+    - "UOM"
+    - "ShipTo"
+    properties:
+      UOM:
+        type: "string"
+        description: "Uom of the quantity values to be returned in"
+        enum:
+        - "LB"
+        - "TN"
+      ShipTo:
+        type: "string"
+        description: "The ship to code you want to inquire delivered pricing too"
+        enum:
+        - "NONE - No Pricing"
+        - "CPU - Base Pricing"
+        - "Ship To Code - Delivered Price"
+      MillName:
+        $ref: "#/definitions/FilterProperties"
+  Order:
+    type: "object"
+    required:
+    - "PONumber"
+    properties:
+      POnumber:
+        type: "string"
+        description: "The purchase order number to be assigned to the order"
+      PODate:
+        type: "string"
+        description: "The purchase order date"
+      BuyersName:
+        type: "string"
+        description: "The purchasing agents name"
+      ShipTo:
+        $ref: "#/definitions/ShipToProperties"
+     
+
